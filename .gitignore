@@ -6,6 +6,7 @@
 # UniFFI / Bindings
 /bindings/
 /focus-core/bindings/
+/focus-core/out/
 
 # Xcode / macOS (Swift)
 build/
