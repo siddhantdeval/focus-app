@@ -48,9 +48,8 @@ cargo build
 
 # 2. Generate the Swift code (The "Bridge")
 mkdir -p out/apple
-# Note: I have set up a custom generator in the previous step. 
-# We will use this to emit the Swift and C-header files.
-cargo run --bin uniffi-bindgen -- src/lib.rs out/apple
+# We use the uniffi-bindgen CLI to extract the Swift and C-header files from the compiled dynamic library.
+cargo run --bin uniffi-bindgen -- generate --library ../target/debug/libfocus_core.dylib --language swift --out-dir out/apple
 ```
 
 ---
