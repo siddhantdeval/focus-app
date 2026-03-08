@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "focus-core",
+]
+resolver = "2"
