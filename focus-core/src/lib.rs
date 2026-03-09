@@ -11,7 +11,7 @@ uniffi::setup_scaffolding!();
 // --- DATA TYPES ---
 
 #[derive(uniffi::Record)]
-pub struct Task {
+pub struct FocusTask {
     pub id: String,
     pub title: String,
     pub is_completed: bool,
@@ -74,10 +74,10 @@ pub fn set_event_observer(observer: Box<dyn EventObserver>) {
 }
 
 #[uniffi::export]
-pub fn create_task(title: String) -> Task {
+pub fn create_task(title: String) -> FocusTask {
     let id = uuid::Uuid::new_v4().to_string();
     let timestamp = chrono::Utc::now().timestamp();
-    let task = Task {
+    let task = FocusTask {
         id: id.clone(),
         title: title.clone(),
         is_completed: false,
@@ -95,7 +95,7 @@ pub fn create_task(title: String) -> Task {
 }
 
 #[uniffi::export]
-pub fn get_tasks() -> Vec<Task> {
+pub fn get_tasks() -> Vec<FocusTask> {
     let db_lock = DB.lock().unwrap();
     if let Some(db) = db_lock.as_ref() {
         db.get_tasks().expect("Failed to fetch tasks from database")
@@ -130,7 +130,7 @@ pub fn delete_task(id: String) {
 }
 
 #[uniffi::export]
-pub fn search_tasks(query: String) -> Vec<Task> {
+pub fn search_tasks(query: String) -> Vec<FocusTask> {
     let db_lock = DB.lock().unwrap();
     if let Some(db) = db_lock.as_ref() {
         db.search_tasks(&query).expect("Failed to search tasks")
@@ -138,6 +138,7 @@ pub fn search_tasks(query: String) -> Vec<Task> {
         panic!("Core not initialized. Call init_core() first.");
     }
 }
+
 
 #[uniffi::export]
 pub fn generate_recurring_tasks() {

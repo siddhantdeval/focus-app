@@ -6,10 +6,10 @@ use std::thread;
 
 enum DbCommand {
     CreateTask(String, String, i64, mpsc::Sender<Result<()>>),
-    GetTasks(mpsc::Sender<Result<Vec<crate::Task>>>),
+    GetTasks(mpsc::Sender<Result<Vec<crate::FocusTask>>>),
     UpdateTaskStatus(String, bool, i64, mpsc::Sender<Result<()>>),
     DeleteTask(String, mpsc::Sender<Result<()>>),
-    SearchTasks(String, mpsc::Sender<Result<Vec<crate::Task>>>),
+    SearchTasks(String, mpsc::Sender<Result<Vec<crate::FocusTask>>>),
     GenerateRecurringTasks(mpsc::Sender<Result<()>>),
 }
 
@@ -46,10 +46,10 @@ impl Database {
                         let _ = resp.send(res);
                     }
                     DbCommand::GetTasks(resp) => {
-                        let res = (|| -> Result<Vec<crate::Task>> {
+                        let res = (|| -> Result<Vec<crate::FocusTask>> {
                             let mut stmt = conn.prepare("SELECT id, title, is_completed FROM tasks ORDER BY created_at DESC")?;
                             let task_iter = stmt.query_map([], |row| {
-                                Ok(crate::Task {
+                                Ok(crate::FocusTask {
                                     id: row.get(0)?,
                                     title: row.get(1)?,
                                     is_completed: row.get(2)?,
@@ -78,10 +78,10 @@ impl Database {
                         let _ = resp.send(res);
                     }
                     DbCommand::SearchTasks(query, resp) => {
-                        let res = (|| -> Result<Vec<crate::Task>> {
+                        let res = (|| -> Result<Vec<crate::FocusTask>> {
                             let mut stmt = conn.prepare("SELECT t.id, t.title, t.is_completed FROM tasks t JOIN tasks_fts f ON t.id = f.id WHERE tasks_fts MATCH ?1 ORDER BY rank")?;
                             let task_iter = stmt.query_map(params![query], |row| {
-                                Ok(crate::Task {
+                                Ok(crate::FocusTask {
                                     id: row.get(0)?,
                                     title: row.get(1)?,
                                     is_completed: row.get(2)?,
@@ -180,7 +180,7 @@ impl Database {
         rx.recv().unwrap()
     }
 
-    pub fn get_tasks(&self) -> Result<Vec<crate::Task>> {
+    pub fn get_tasks(&self) -> Result<Vec<crate::FocusTask>> {
         let (tx, rx) = mpsc::channel();
         self.tx.send(DbCommand::GetTasks(tx)).unwrap();
         rx.recv().unwrap()
@@ -198,7 +198,7 @@ impl Database {
         rx.recv().unwrap()
     }
     
-    pub fn search_tasks(&self, query: &str) -> Result<Vec<crate::Task>> {
+    pub fn search_tasks(&self, query: &str) -> Result<Vec<crate::FocusTask>> {
         let (tx, rx) = mpsc::channel();
         self.tx.send(DbCommand::SearchTasks(query.to_string(), tx)).unwrap();
         rx.recv().unwrap()
@@ -210,3 +210,4 @@ impl Database {
         rx.recv().unwrap()
     }
 }
+
