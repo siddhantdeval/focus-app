@@ -72,4 +72,20 @@ impl Database {
         }
         Ok(tasks)
     }
+
+    pub fn update_task_status(&self, id: &str, is_completed: bool, timestamp: i64) -> Result<()> {
+        self.conn.execute(
+            "UPDATE tasks SET is_completed = ?1, updated_at = ?2 WHERE id = ?3",
+            params![is_completed, timestamp, id],
+        )?;
+        Ok(())
+    }
+
+    pub fn delete_task(&self, id: &str) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM tasks WHERE id = ?1",
+            params![id],
+        )?;
+        Ok(())
+    }
 }

@@ -784,6 +784,12 @@ public func createTask(title: String) -> Task {
     )
 })
 }
+public func deleteTask(id: String) {try! rustCall() {
+    uniffi_focus_core_fn_func_delete_task(
+        FfiConverterString.lower(id),$0
+    )
+}
+}
 public func getTasks() -> [Task] {
     return try!  FfiConverterSequenceTypeTask.lift(try! rustCall() {
     uniffi_focus_core_fn_func_get_tasks($0
@@ -795,6 +801,12 @@ public func getVersion() -> String {
     uniffi_focus_core_fn_func_get_version($0
     )
 })
+}
+public func initCore(dbPath: String) {try! rustCall() {
+    uniffi_focus_core_fn_func_init_core(
+        FfiConverterString.lower(dbPath),$0
+    )
+}
 }
 public func pauseTimer() {try! rustCall() {
     uniffi_focus_core_fn_func_pause_timer($0
@@ -818,6 +830,13 @@ public func stopTimer() {try! rustCall() {
     )
 }
 }
+public func updateTaskStatus(id: String, completed: Bool) {try! rustCall() {
+    uniffi_focus_core_fn_func_update_task_status(
+        FfiConverterString.lower(id),
+        FfiConverterBool.lower(completed),$0
+    )
+}
+}
 
 private enum InitializationResult {
     case ok
@@ -837,10 +856,16 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_create_task() != 33270) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_focus_core_checksum_func_delete_task() != 35093) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_focus_core_checksum_func_get_tasks() != 6857) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_get_version() != 8149) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_focus_core_checksum_func_init_core() != 43418) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_pause_timer() != 2886) {
@@ -853,6 +878,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_stop_timer() != 56297) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_focus_core_checksum_func_update_task_status() != 6425) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_method_timerobserver_on_tick() != 48437) {

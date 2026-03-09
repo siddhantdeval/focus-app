@@ -60,7 +60,42 @@ mod tests {
         let db = crate::database::Database::open_in_memory().unwrap();
         db.create_task("1", "Test Task", 1000).unwrap();
 
+        let mut tasks = db.get_tasks().unwrap();
+        assert_eq!(tasks.len(), 1);
+        assert_eq!(tasks[0].is_completed, false);
+
+        // Test update
+        db.update_task_status("1", true, 2000).unwrap();
+        tasks = db.get_tasks().unwrap();
+        assert_eq!(tasks[0].is_completed, true);
+
+        // Test delete
+        db.delete_task("1").unwrap();
+        tasks = db.get_tasks().unwrap();
+        assert_eq!(tasks.len(), 0);
+    }
+
+    #[test]
+    fn test_persistent_database() {
+        let temp_dir = std::env::temp_dir();
+        let db_path = temp_dir.join("test_focus.db");
+        
+        // Clean up previous test run if exists
+        if db_path.exists() {
+            let _ = std::fs::remove_file(&db_path);
+        }
+
+        {
+            let db = crate::database::Database::open(&db_path).unwrap();
+            db.create_task("p1", "Persistent Task", 1000).unwrap();
+        } // Connection drops here
+
+        // Re-open and verify
+        let db = crate::database::Database::open(&db_path).unwrap();
         let tasks = db.get_tasks().unwrap();
         assert_eq!(tasks.len(), 1);
+        assert_eq!(tasks[0].title, "Persistent Task");
+
+        let _ = std::fs::remove_file(&db_path);
     }
 }

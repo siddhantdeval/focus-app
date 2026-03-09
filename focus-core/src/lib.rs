@@ -32,14 +32,22 @@ pub enum TimerState {
 
 // --- SINGLETONS ---
 
-static DB: Lazy<Mutex<database::Database>> = Lazy::new(|| {
-    let db = database::Database::open_in_memory().expect("Failed to open database");
-    Mutex::new(db)
+static DB: Lazy<Mutex<Option<database::Database>>> = Lazy::new(|| {
+    Mutex::new(None)
 });
 
 static TIMER: Lazy<timer::TimerEngine> = Lazy::new(timer::TimerEngine::new);
 
 // --- EXPORTED FUNCTIONS ---
+
+#[uniffi::export]
+pub fn init_core(db_path: String) {
+    let mut db_lock = DB.lock().unwrap();
+    if db_lock.is_none() {
+        let db = database::Database::open(&db_path).expect("Failed to open permanent database");
+        *db_lock = Some(db);
+    }
+}
 
 #[uniffi::export]
 pub fn create_task(title: String) -> Task {
@@ -51,16 +59,47 @@ pub fn create_task(title: String) -> Task {
         is_completed: false,
     };
 
-    let db = DB.lock().unwrap();
-    db.create_task(&id, &title, timestamp)
-        .expect("Failed to create task in database");
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.create_task(&id, &title, timestamp)
+            .expect("Failed to create task in database");
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
     task
 }
 
 #[uniffi::export]
 pub fn get_tasks() -> Vec<Task> {
-    let db = DB.lock().unwrap();
-    db.get_tasks().expect("Failed to fetch tasks from database")
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.get_tasks().expect("Failed to fetch tasks from database")
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+}
+
+#[uniffi::export]
+pub fn update_task_status(id: String, completed: bool) {
+    let timestamp = chrono::Utc::now().timestamp();
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.update_task_status(&id, completed, timestamp)
+            .expect("Failed to update task status in database");
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+}
+
+#[uniffi::export]
+pub fn delete_task(id: String) {
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.delete_task(&id)
+            .expect("Failed to delete task from database");
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
 }
 
 #[uniffi::export]
