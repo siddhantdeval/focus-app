@@ -478,7 +478,7 @@ fileprivate struct FfiConverterString: FfiConverter {
 }
 
 
-public struct Task {
+public struct FocusTask {
     public var id: String
     public var title: String
     public var isCompleted: Bool
@@ -494,8 +494,8 @@ public struct Task {
 
 
 
-extension Task: Equatable, Hashable {
-    public static func ==(lhs: Task, rhs: Task) -> Bool {
+extension FocusTask: Equatable, Hashable {
+    public static func ==(lhs: FocusTask, rhs: FocusTask) -> Bool {
         if lhs.id != rhs.id {
             return false
         }
@@ -519,17 +519,17 @@ extension Task: Equatable, Hashable {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public struct FfiConverterTypeTask: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Task {
+public struct FfiConverterTypeFocusTask: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FocusTask {
         return
-            try Task(
+            try FocusTask(
                 id: FfiConverterString.read(from: &buf), 
                 title: FfiConverterString.read(from: &buf), 
                 isCompleted: FfiConverterBool.read(from: &buf)
         )
     }
 
-    public static func write(_ value: Task, into buf: inout [UInt8]) {
+    public static func write(_ value: FocusTask, into buf: inout [UInt8]) {
         FfiConverterString.write(value.id, into: &buf)
         FfiConverterString.write(value.title, into: &buf)
         FfiConverterBool.write(value.isCompleted, into: &buf)
@@ -540,15 +540,15 @@ public struct FfiConverterTypeTask: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeTask_lift(_ buf: RustBuffer) throws -> Task {
-    return try FfiConverterTypeTask.lift(buf)
+public func FfiConverterTypeFocusTask_lift(_ buf: RustBuffer) throws -> FocusTask {
+    return try FfiConverterTypeFocusTask.lift(buf)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeTask_lower(_ value: Task) -> RustBuffer {
-    return FfiConverterTypeTask.lower(value)
+public func FfiConverterTypeFocusTask_lower(_ value: FocusTask) -> RustBuffer {
+    return FfiConverterTypeFocusTask.lower(value)
 }
 
 // Note that we don't yet support `indirect` for enums.
@@ -912,29 +912,29 @@ extension FfiConverterCallbackInterfaceTimerObserver : FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-fileprivate struct FfiConverterSequenceTypeTask: FfiConverterRustBuffer {
-    typealias SwiftType = [Task]
+fileprivate struct FfiConverterSequenceTypeFocusTask: FfiConverterRustBuffer {
+    typealias SwiftType = [FocusTask]
 
-    public static func write(_ value: [Task], into buf: inout [UInt8]) {
+    public static func write(_ value: [FocusTask], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
-            FfiConverterTypeTask.write(item, into: &buf)
+            FfiConverterTypeFocusTask.write(item, into: &buf)
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Task] {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [FocusTask] {
         let len: Int32 = try readInt(&buf)
-        var seq = [Task]()
+        var seq = [FocusTask]()
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
-            seq.append(try FfiConverterTypeTask.read(from: &buf))
+            seq.append(try FfiConverterTypeFocusTask.read(from: &buf))
         }
         return seq
     }
 }
-public func createTask(title: String) -> Task {
-    return try!  FfiConverterTypeTask.lift(try! rustCall() {
+public func createTask(title: String) -> FocusTask {
+    return try!  FfiConverterTypeFocusTask.lift(try! rustCall() {
     uniffi_focus_core_fn_func_create_task(
         FfiConverterString.lower(title),$0
     )
@@ -951,8 +951,8 @@ public func generateRecurringTasks() {try! rustCall() {
     )
 }
 }
-public func getTasks() -> [Task] {
-    return try!  FfiConverterSequenceTypeTask.lift(try! rustCall() {
+public func getTasks() -> [FocusTask] {
+    return try!  FfiConverterSequenceTypeFocusTask.lift(try! rustCall() {
     uniffi_focus_core_fn_func_get_tasks($0
     )
 })
@@ -979,8 +979,8 @@ public func resumeTimer() {try! rustCall() {
     )
 }
 }
-public func searchTasks(query: String) -> [Task] {
-    return try!  FfiConverterSequenceTypeTask.lift(try! rustCall() {
+public func searchTasks(query: String) -> [FocusTask] {
+    return try!  FfiConverterSequenceTypeFocusTask.lift(try! rustCall() {
     uniffi_focus_core_fn_func_search_tasks(
         FfiConverterString.lower(query),$0
     )
@@ -1027,7 +1027,7 @@ private var initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_focus_core_checksum_func_create_task() != 33270) {
+    if (uniffi_focus_core_checksum_func_create_task() != 45837) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_delete_task() != 35093) {
@@ -1036,7 +1036,7 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_generate_recurring_tasks() != 47528) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_focus_core_checksum_func_get_tasks() != 6857) {
+    if (uniffi_focus_core_checksum_func_get_tasks() != 39748) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_get_version() != 8149) {
@@ -1051,7 +1051,7 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_resume_timer() != 62750) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_focus_core_checksum_func_search_tasks() != 3094) {
+    if (uniffi_focus_core_checksum_func_search_tasks() != 52093) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_set_event_observer() != 43281) {
