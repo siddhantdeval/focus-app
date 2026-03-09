@@ -223,11 +223,12 @@ CREATE TABLE sync_metadata (
 *   Implement the core Timer state machine in Rust.
 *   Build skeleton SwiftUI & WinUI interfaces proving the FFI bridge.
 
-### Phase 2: Productivity Features (Weeks 4-6)
-*   Implement Subtasks, Notes schema, and UI binding.
-*   Implement Recurring Tasks logic (scheduling engine).
-*   Hook up Native Rich Notifications for Reminders and Timer completion, including OS 'Quick Reply' input.
-*   Implement Menu Bar (macOS) / System Tray (Windows) Dropdown with global shortcut summoning.
+### Phase 2: Productivity Features & Production Integration (Weeks 4-6)
+*   **Production Integration (Apple):** Migrate from the initial "Run Script" build phase to a production-grade **XCFramework + Swift Package Manager (SPM)** architecture. This bypasses Xcode's script sandbox and improves build reliability.
+*   **Feature Build-out:** Implement Subtasks, Notes schema, and UI binding.
+*   **Scheduling:** Implement Recurring Tasks logic (scheduling engine).
+*   **Notifications:** Hook up Native Rich Notifications for Reminders and Timer completion, including OS 'Quick Reply' input.
+*   **Accessibility:** Implement Menu Bar (macOS) / System Tray (Windows) Dropdown with global shortcut summoning.
 
 ### Phase 3: Insights & Polish (Weeks 7-8)
 *   Aggregate Pomodoro data into Daily Reports.

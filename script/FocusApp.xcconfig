@@ -1,0 +1,14 @@
+// FocusApp Configuration
+// This file explicitly controls Xcode's build settings so we don't have to use the UI.
+
+// 1. Point Xcode to the generated C-Header (No more 'RustBuffer' errors)
+SWIFT_OBJC_BRIDGING_HEADER = $(PROJECT_DIR)/Generated/focus_coreFFI.h
+
+// 2. Tell Xcode where to find the Rust Library
+LIBRARY_SEARCH_PATHS = $(inherited) $(PROJECT_DIR)/../../target/debug/
+
+// 3. Ensure the app can load the dynamic bridge at runtime
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/../Frameworks
+
+// 4. Safely disable the restrictive Script Sandbox so our Rust Generator works
+ENABLE_USER_SCRIPT_SANDBOXING = NO
