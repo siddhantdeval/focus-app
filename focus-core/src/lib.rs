@@ -15,6 +15,7 @@ pub struct FocusTask {
     pub id: String,
     pub title: String,
     pub is_completed: bool,
+    pub notes: Option<String>,
 }
 
 #[uniffi::export(callback_interface)]
@@ -33,6 +34,7 @@ pub enum TimerState {
 #[derive(Clone, Debug, PartialEq, uniffi::Enum)]
 pub enum CoreEvent {
     TasksUpdated,
+    SessionComplete,
 }
 
 #[uniffi::export(callback_interface)]
@@ -50,9 +52,15 @@ static TIMER: Lazy<timer::TimerEngine> = Lazy::new(timer::TimerEngine::new);
 
 static EVENT_OBSERVER: Lazy<Mutex<Option<Box<dyn EventObserver>>>> = Lazy::new(|| Mutex::new(None));
 
-fn emit_tasks_updated() {
+pub fn emit_tasks_updated() {
     if let Some(obs) = EVENT_OBSERVER.lock().unwrap().as_ref() {
         obs.on_event(CoreEvent::TasksUpdated);
+    }
+}
+
+pub fn emit_session_complete() {
+    if let Some(obs) = EVENT_OBSERVER.lock().unwrap().as_ref() {
+        obs.on_event(CoreEvent::SessionComplete);
     }
 }
 
@@ -81,6 +89,7 @@ pub fn create_task(title: String) -> FocusTask {
         id: id.clone(),
         title: title.clone(),
         is_completed: false,
+        notes: None,
     };
 
     let db_lock = DB.lock().unwrap();
@@ -134,6 +143,38 @@ pub fn search_tasks(query: String) -> Vec<FocusTask> {
     let db_lock = DB.lock().unwrap();
     if let Some(db) = db_lock.as_ref() {
         db.search_tasks(&query).expect("Failed to search tasks")
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+}
+
+#[uniffi::export]
+pub fn upsert_note(id: String, note: String) {
+    let timestamp = chrono::Utc::now().timestamp();
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.upsert_note(&id, &note, timestamp).expect("Failed to upsert note");
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+    emit_tasks_updated();
+}
+
+#[uniffi::export]
+pub fn get_setting(key: String) -> Option<String> {
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.get_setting(&key).expect("Failed to get setting")
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+}
+
+#[uniffi::export]
+pub fn set_setting(key: String, value: String) {
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.set_setting(&key, &value).expect("Failed to set setting");
     } else {
         panic!("Core not initialized. Call init_core() first.");
     }

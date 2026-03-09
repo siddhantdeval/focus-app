@@ -315,6 +315,11 @@ void uniffi_focus_core_fn_func_generate_recurring_tasks(RustCallStatus *_Nonnull
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GET_SETTING
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GET_SETTING
+RustBuffer uniffi_focus_core_fn_func_get_setting(RustBuffer key, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GET_TASKS
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GET_TASKS
 RustBuffer uniffi_focus_core_fn_func_get_tasks(RustCallStatus *_Nonnull out_status
@@ -354,6 +359,11 @@ RustBuffer uniffi_focus_core_fn_func_search_tasks(RustBuffer query, RustCallStat
 void uniffi_focus_core_fn_func_set_event_observer(uint64_t observer, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_SET_SETTING
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_SET_SETTING
+void uniffi_focus_core_fn_func_set_setting(RustBuffer key, RustBuffer value, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_START_TIMER
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_START_TIMER
 void uniffi_focus_core_fn_func_start_timer(uint32_t duration_seconds, uint64_t observer, RustCallStatus *_Nonnull out_status
@@ -368,6 +378,11 @@ void uniffi_focus_core_fn_func_stop_timer(RustCallStatus *_Nonnull out_status
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_UPDATE_TASK_STATUS
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_UPDATE_TASK_STATUS
 void uniffi_focus_core_fn_func_update_task_status(RustBuffer id, int8_t completed, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_UPSERT_NOTE
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_UPSERT_NOTE
+void uniffi_focus_core_fn_func_upsert_note(RustBuffer id, RustBuffer note, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_FOCUS_CORE_RUSTBUFFER_ALLOC
@@ -668,6 +683,12 @@ uint16_t uniffi_focus_core_checksum_func_generate_recurring_tasks(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GET_SETTING
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GET_SETTING
+uint16_t uniffi_focus_core_checksum_func_get_setting(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GET_TASKS
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GET_TASKS
 uint16_t uniffi_focus_core_checksum_func_get_tasks(void
@@ -710,6 +731,12 @@ uint16_t uniffi_focus_core_checksum_func_set_event_observer(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_SET_SETTING
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_SET_SETTING
+uint16_t uniffi_focus_core_checksum_func_set_setting(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_START_TIMER
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_START_TIMER
 uint16_t uniffi_focus_core_checksum_func_start_timer(void
@@ -725,6 +752,12 @@ uint16_t uniffi_focus_core_checksum_func_stop_timer(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_UPDATE_TASK_STATUS
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_UPDATE_TASK_STATUS
 uint16_t uniffi_focus_core_checksum_func_update_task_status(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_UPSERT_NOTE
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_UPSERT_NOTE
+uint16_t uniffi_focus_core_checksum_func_upsert_note(void
     
 );
 #endif

@@ -482,13 +482,15 @@ public struct FocusTask {
     public var id: String
     public var title: String
     public var isCompleted: Bool
+    public var notes: String?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(id: String, title: String, isCompleted: Bool) {
+    public init(id: String, title: String, isCompleted: Bool, notes: String?) {
         self.id = id
         self.title = title
         self.isCompleted = isCompleted
+        self.notes = notes
     }
 }
 
@@ -505,6 +507,9 @@ extension FocusTask: Equatable, Hashable {
         if lhs.isCompleted != rhs.isCompleted {
             return false
         }
+        if lhs.notes != rhs.notes {
+            return false
+        }
         return true
     }
 
@@ -512,6 +517,7 @@ extension FocusTask: Equatable, Hashable {
         hasher.combine(id)
         hasher.combine(title)
         hasher.combine(isCompleted)
+        hasher.combine(notes)
     }
 }
 
@@ -525,7 +531,8 @@ public struct FfiConverterTypeFocusTask: FfiConverterRustBuffer {
             try FocusTask(
                 id: FfiConverterString.read(from: &buf), 
                 title: FfiConverterString.read(from: &buf), 
-                isCompleted: FfiConverterBool.read(from: &buf)
+                isCompleted: FfiConverterBool.read(from: &buf), 
+                notes: FfiConverterOptionString.read(from: &buf)
         )
     }
 
@@ -533,6 +540,7 @@ public struct FfiConverterTypeFocusTask: FfiConverterRustBuffer {
         FfiConverterString.write(value.id, into: &buf)
         FfiConverterString.write(value.title, into: &buf)
         FfiConverterBool.write(value.isCompleted, into: &buf)
+        FfiConverterOptionString.write(value.notes, into: &buf)
     }
 }
 
@@ -557,6 +565,7 @@ public func FfiConverterTypeFocusTask_lower(_ value: FocusTask) -> RustBuffer {
 public enum CoreEvent {
     
     case tasksUpdated
+    case sessionComplete
 }
 
 
@@ -572,6 +581,8 @@ public struct FfiConverterTypeCoreEvent: FfiConverterRustBuffer {
         
         case 1: return .tasksUpdated
         
+        case 2: return .sessionComplete
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
@@ -582,6 +593,10 @@ public struct FfiConverterTypeCoreEvent: FfiConverterRustBuffer {
         
         case .tasksUpdated:
             writeInt(&buf, Int32(1))
+        
+        
+        case .sessionComplete:
+            writeInt(&buf, Int32(2))
         
         }
     }
@@ -912,6 +927,30 @@ extension FfiConverterCallbackInterfaceTimerObserver : FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
+    typealias SwiftType = String?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterString.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterString.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeFocusTask: FfiConverterRustBuffer {
     typealias SwiftType = [FocusTask]
 
@@ -950,6 +989,13 @@ public func generateRecurringTasks() {try! rustCall() {
     uniffi_focus_core_fn_func_generate_recurring_tasks($0
     )
 }
+}
+public func getSetting(key: String) -> String? {
+    return try!  FfiConverterOptionString.lift(try! rustCall() {
+    uniffi_focus_core_fn_func_get_setting(
+        FfiConverterString.lower(key),$0
+    )
+})
 }
 public func getTasks() -> [FocusTask] {
     return try!  FfiConverterSequenceTypeFocusTask.lift(try! rustCall() {
@@ -992,6 +1038,13 @@ public func setEventObserver(observer: EventObserver) {try! rustCall() {
     )
 }
 }
+public func setSetting(key: String, value: String) {try! rustCall() {
+    uniffi_focus_core_fn_func_set_setting(
+        FfiConverterString.lower(key),
+        FfiConverterString.lower(value),$0
+    )
+}
+}
 public func startTimer(durationSeconds: UInt32, observer: TimerObserver) {try! rustCall() {
     uniffi_focus_core_fn_func_start_timer(
         FfiConverterUInt32.lower(durationSeconds),
@@ -1008,6 +1061,13 @@ public func updateTaskStatus(id: String, completed: Bool) {try! rustCall() {
     uniffi_focus_core_fn_func_update_task_status(
         FfiConverterString.lower(id),
         FfiConverterBool.lower(completed),$0
+    )
+}
+}
+public func upsertNote(id: String, note: String) {try! rustCall() {
+    uniffi_focus_core_fn_func_upsert_note(
+        FfiConverterString.lower(id),
+        FfiConverterString.lower(note),$0
     )
 }
 }
@@ -1036,6 +1096,9 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_generate_recurring_tasks() != 47528) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_focus_core_checksum_func_get_setting() != 17026) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_focus_core_checksum_func_get_tasks() != 39748) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -1057,6 +1120,9 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_set_event_observer() != 43281) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_focus_core_checksum_func_set_setting() != 47247) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_focus_core_checksum_func_start_timer() != 20441) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -1064,6 +1130,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_func_update_task_status() != 6425) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_focus_core_checksum_func_upsert_note() != 12725) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_focus_core_checksum_method_eventobserver_on_event() != 5462) {

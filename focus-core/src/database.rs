@@ -11,6 +11,9 @@ enum DbCommand {
     DeleteTask(String, mpsc::Sender<Result<()>>),
     SearchTasks(String, mpsc::Sender<Result<Vec<crate::FocusTask>>>),
     GenerateRecurringTasks(mpsc::Sender<Result<()>>),
+    UpsertNote(String, String, i64, mpsc::Sender<Result<()>>),
+    GetSetting(String, mpsc::Sender<Result<Option<String>>>),
+    SetSetting(String, String, mpsc::Sender<Result<()>>),
 }
 
 pub struct Database {
@@ -47,12 +50,13 @@ impl Database {
                     }
                     DbCommand::GetTasks(resp) => {
                         let res = (|| -> Result<Vec<crate::FocusTask>> {
-                            let mut stmt = conn.prepare("SELECT id, title, is_completed FROM tasks ORDER BY created_at DESC")?;
+                            let mut stmt = conn.prepare("SELECT id, title, is_completed, notes FROM tasks ORDER BY created_at DESC")?;
                             let task_iter = stmt.query_map([], |row| {
                                 Ok(crate::FocusTask {
                                     id: row.get(0)?,
                                     title: row.get(1)?,
                                     is_completed: row.get(2)?,
+                                    notes: row.get(3).unwrap_or(None),
                                 })
                             })?;
                             let mut tasks = Vec::new();
@@ -79,12 +83,13 @@ impl Database {
                     }
                     DbCommand::SearchTasks(query, resp) => {
                         let res = (|| -> Result<Vec<crate::FocusTask>> {
-                            let mut stmt = conn.prepare("SELECT t.id, t.title, t.is_completed FROM tasks t JOIN tasks_fts f ON t.id = f.id WHERE tasks_fts MATCH ?1 ORDER BY rank")?;
+                            let mut stmt = conn.prepare("SELECT t.id, t.title, t.is_completed, t.notes FROM tasks t JOIN tasks_fts f ON t.id = f.id WHERE tasks_fts MATCH ?1 ORDER BY rank")?;
                             let task_iter = stmt.query_map(params![query], |row| {
                                 Ok(crate::FocusTask {
                                     id: row.get(0)?,
                                     title: row.get(1)?,
                                     is_completed: row.get(2)?,
+                                    notes: row.get(3).unwrap_or(None),
                                 })
                             })?;
                             let mut tasks = Vec::new();
@@ -114,6 +119,32 @@ impl Database {
                         })();
                         let _ = resp.send(res);
                     }
+                    DbCommand::UpsertNote(id, note, timestamp, resp) => {
+                        let res = conn.execute(
+                            "UPDATE tasks SET notes = ?1, updated_at = ?2 WHERE id = ?3",
+                            params![note, timestamp, id],
+                        ).map(|_| ());
+                        let _ = resp.send(res);
+                    }
+                    DbCommand::GetSetting(key, resp) => {
+                        let res = (|| -> Result<Option<String>> {
+                            let mut stmt = conn.prepare("SELECT value FROM app_settings WHERE key = ?1")?;
+                            let mut rows = stmt.query(params![key])?;
+                            if let Some(row) = rows.next()? {
+                                Ok(Some(row.get(0)?))
+                            } else {
+                                Ok(None)
+                            }
+                        })();
+                        let _ = resp.send(res);
+                    }
+                    DbCommand::SetSetting(key, value, resp) => {
+                        let res = conn.execute(
+                            "INSERT INTO app_settings (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                            params![key, value],
+                        ).map(|_| ());
+                        let _ = resp.send(res);
+                    }
                 }
             }
         });
@@ -128,6 +159,7 @@ impl Database {
                 id TEXT PRIMARY KEY,
                 parent_id TEXT,
                 title TEXT NOT NULL,
+                notes TEXT,
                 is_completed BOOLEAN DEFAULT 0,
                 due_date INTEGER,
                 created_at INTEGER NOT NULL,
@@ -137,7 +169,14 @@ impl Database {
             );
             
             CREATE INDEX IF NOT EXISTS idx_tasks_parent ON tasks(parent_id);
+            "
+        )?;
 
+        // Safe migration for existing DB
+        let _ = conn.execute("ALTER TABLE tasks ADD COLUMN notes TEXT", []);
+
+        conn.execute_batch(
+            "
             CREATE VIRTUAL TABLE IF NOT EXISTS tasks_fts USING fts5(
                 id UNINDEXED,
                 title,
@@ -207,6 +246,24 @@ impl Database {
     pub fn generate_recurring_tasks(&self) -> Result<()> {
         let (tx, rx) = mpsc::channel();
         self.tx.send(DbCommand::GenerateRecurringTasks(tx)).unwrap();
+        rx.recv().unwrap()
+    }
+
+    pub fn upsert_note(&self, id: &str, note: &str, timestamp: i64) -> Result<()> {
+        let (tx, rx) = mpsc::channel();
+        self.tx.send(DbCommand::UpsertNote(id.to_string(), note.to_string(), timestamp, tx)).unwrap();
+        rx.recv().unwrap()
+    }
+
+    pub fn get_setting(&self, key: &str) -> Result<Option<String>> {
+        let (tx, rx) = mpsc::channel();
+        self.tx.send(DbCommand::GetSetting(key.to_string(), tx)).unwrap();
+        rx.recv().unwrap()
+    }
+
+    pub fn set_setting(&self, key: &str, value: &str) -> Result<()> {
+        let (tx, rx) = mpsc::channel();
+        self.tx.send(DbCommand::SetSetting(key.to_string(), value.to_string(), tx)).unwrap();
         rx.recv().unwrap()
     }
 }

@@ -1,12 +1,14 @@
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use chrono::Utc;
 
 pub use crate::{TimerObserver, TimerState};
 
 pub struct TimerEngine {
     state: Arc<Mutex<TimerState>>,
     remaining_seconds: Arc<Mutex<u32>>,
+    expected_end_time: Arc<Mutex<Option<i64>>>,
     observer: Arc<Mutex<Option<Box<dyn TimerObserver>>>>,
 }
 
@@ -15,6 +17,7 @@ impl TimerEngine {
         Self {
             state: Arc::new(Mutex::new(TimerState::Idle)),
             remaining_seconds: Arc::new(Mutex::new(1500)), // 25 mins default
+            expected_end_time: Arc::new(Mutex::new(None)),
             observer: Arc::new(Mutex::new(None)),
         }
     }
@@ -33,6 +36,9 @@ impl TimerEngine {
         *state = TimerState::Running;
         let mut remaining = self.remaining_seconds.lock().unwrap();
         *remaining = duration_seconds;
+        
+        let mut expected = self.expected_end_time.lock().unwrap();
+        *expected = Some(Utc::now().timestamp() + duration_seconds as i64);
 
         // Notify observer
         if let Some(obs) = self.observer.lock().unwrap().as_ref() {
@@ -47,6 +53,8 @@ impl TimerEngine {
         let mut state = self.state.lock().unwrap();
         if *state == TimerState::Running {
             *state = TimerState::Paused;
+            let mut expected = self.expected_end_time.lock().unwrap();
+            *expected = None;
             if let Some(obs) = self.observer.lock().unwrap().as_ref() {
                 obs.on_state_changed(TimerState::Paused);
             }
@@ -57,6 +65,9 @@ impl TimerEngine {
         let mut state = self.state.lock().unwrap();
         if *state == TimerState::Paused {
             *state = TimerState::Running;
+            let mut expected = self.expected_end_time.lock().unwrap();
+            let remaining = self.remaining_seconds.lock().unwrap();
+            *expected = Some(Utc::now().timestamp() + *remaining as i64);
             if let Some(obs) = self.observer.lock().unwrap().as_ref() {
                 obs.on_state_changed(TimerState::Running);
             }
@@ -66,6 +77,8 @@ impl TimerEngine {
     pub fn stop(&self) {
         let mut state = self.state.lock().unwrap();
         *state = TimerState::Idle;
+        let mut expected = self.expected_end_time.lock().unwrap();
+        *expected = None;
         if let Some(obs) = self.observer.lock().unwrap().as_ref() {
             obs.on_state_changed(TimerState::Idle);
         }
@@ -74,6 +87,7 @@ impl TimerEngine {
     fn spawn_timer_thread(&self) {
         let state_clone = Arc::clone(&self.state);
         let remaining_clone = Arc::clone(&self.remaining_seconds);
+        let expected_clone = Arc::clone(&self.expected_end_time);
         let observer_clone = Arc::clone(&self.observer);
 
         thread::spawn(move || {
@@ -86,18 +100,28 @@ impl TimerEngine {
                 }
 
                 if *state == TimerState::Running {
-                    let mut remaining = remaining_clone.lock().unwrap();
-                    if *remaining > 0 {
-                        *remaining -= 1;
-                        if let Some(obs) = observer_clone.lock().unwrap().as_ref() {
-                            obs.on_tick(*remaining);
+                    let expected_opt = *expected_clone.lock().unwrap();
+                    if let Some(expected_time) = expected_opt {
+                        let now = Utc::now().timestamp();
+                        let remaining = expected_time - now;
+                        
+                        let mut remaining_lock = remaining_clone.lock().unwrap();
+                        if remaining > 0 {
+                            *remaining_lock = remaining as u32;
+                            if let Some(obs) = observer_clone.lock().unwrap().as_ref() {
+                                obs.on_tick(*remaining_lock);
+                            }
+                        } else {
+                            *remaining_lock = 0;
+                            *state = TimerState::Idle;
+                            let mut expected_lock = expected_clone.lock().unwrap();
+                            *expected_lock = None;
+                            if let Some(obs) = observer_clone.lock().unwrap().as_ref() {
+                                obs.on_state_changed(TimerState::Idle);
+                            }
+                            crate::emit_session_complete();
+                            break;
                         }
-                    } else {
-                        *state = TimerState::Idle;
-                        if let Some(obs) = observer_clone.lock().unwrap().as_ref() {
-                            obs.on_state_changed(TimerState::Idle);
-                        }
-                        break;
                     }
                 }
             }

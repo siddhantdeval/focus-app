@@ -9,94 +9,52 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = FocusViewModel()
+    @State private var showingCommandPalette = false
     
     var body: some View {
-        HStack(spacing: 0) {
-            // Left Side: Task List
-            VStack(alignment: .leading) {
-                Text("Tasks")
-                    .font(.headline)
-                    .padding()
-                
-                HStack {
-                    TextField("Add a task...", text: $viewModel.newTaskTitle)
-                        .textFieldStyle(.roundedBorder)
-                    Button("Add") {
-                        viewModel.addTask()
+        ZStack {
+            if viewModel.activeMode == .focus {
+                FocusModeView(viewModel: viewModel)
+            } else {
+                NavigationSplitView {
+                    MainSidebarView(viewModel: viewModel)
+                } detail: {
+                    switch viewModel.activeMode {
+                    case .dashboard:
+                        DashboardView(viewModel: viewModel)
+                    case .tasks:
+                        TaskListView(viewModel: viewModel)
+                    case .settings:
+                        SettingsView(viewModel: viewModel)
+                    default:
+                        Text("Work in Progress: \(viewModel.activeMode.rawValue)")
+                            .font(.title)
+                            .foregroundColor(.gray)
                     }
                 }
-                .padding(.horizontal)
-                
-                List(viewModel.tasks, id: \.id) { task in
-                    HStack {
-                        Toggle("", isOn: Binding(
-                            get: { task.isCompleted },
-                            set: { _ in viewModel.toggleTaskCompletion(task: task) }
-                        ))
-                        .labelsHidden()
-                        
-                        Text(task.title)
-                            .strikethrough(task.isCompleted, color: .primary)
-
-                        
-                        Spacer()
-                        
-                        Button("Delete") {
-                            viewModel.delete(id: task.id)
-                        }
-                        .foregroundColor(.red)
-                        .buttonStyle(.plain)
-                    }
-                }
+                .frame(minWidth: 800, minHeight: 600)
             }
-            .frame(minWidth: 300, maxWidth: .infinity)
             
-            Divider()
-            
-            // Right Side: Timer
-            VStack {
-                Text("Focus Time")
-                    .font(.headline)
-                    .padding()
-                
-                Spacer()
-                
-                Text(formatTime(viewModel.timerRemaining))
-                    .font(.system(size: 80, weight: .bold, design: .default))
-                    .padding()
-                
-                Text("State: \(String(describing: viewModel.timerState))")
-                    .foregroundColor(.secondary)
-                    .padding(.bottom)
-                
-                HStack(spacing: 20) {
-                    if viewModel.timerState == .idle || viewModel.timerState == .paused {
-                        Button(viewModel.timerState == .idle ? "Start" : "Resume") {
-                            viewModel.start(duration: 1500) // 25 minutes
-                        }
-                        .buttonStyle(.borderedProminent)
+            // Command Palette Overlay (S7)
+            if showingCommandPalette {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        showingCommandPalette = false
                     }
-                    
-                    if viewModel.timerState == .running {
-                        Button("Pause") {
-                            viewModel.pause()
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    
-                    if viewModel.timerState != .idle {
-                        Button("Stop") {
-                            viewModel.stop()
-                        }
-                        .buttonStyle(.bordered)
-                        .foregroundColor(.red)
-                    }
-                }
                 
-                Spacer()
+                CommandPaletteView(viewModel: viewModel, isPresented: $showingCommandPalette)
             }
-            .frame(minWidth: 400, maxWidth: .infinity)
-            .background(Color(NSColor.windowBackgroundColor))
+        }
+        // Global Keyboard Shortcut for Command Palette
+        .onAppear {
+            NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                if event.modifierFlags.contains(.command) && event.keyCode == 40 { // 40 is 'k'
+                    showingCommandPalette.toggle()
+                    return nil
+                }
+                return event
+            }
         }
     }
 }
