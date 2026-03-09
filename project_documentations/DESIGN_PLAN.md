@@ -109,7 +109,8 @@ SCREEN STRUCTURE
 Design the following screens with detailed component hierarchy.
 
 SCREEN 1 — PRODUCTIVITY DASHBOARD
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `834685fa805e48cd86d4cf847750c685` | [Mockup](design_asset/productivity_dashboard_mockup.png) | [Code](design_asset/productivity_dashboard_code.html)
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `834685fa805e48cd86d4cf847750c685` | [Mockup](design_asset/productivity_dashboard_mockup.png) | [Code](design_asset/productivity_dashboard_code.html) | [**Full Specification**](screen_specifications/S1_PRODUCTIVITY_DASHBOARD.md)
+<!-- slide -->
 
 Purpose
 Central workspace for daily productivity.
@@ -157,7 +158,8 @@ Add note
 The timer and current task must visually dominate the screen.
 
 SCREEN 2 — TASK MANAGEMENT VIEW
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `4561bf01b3e94bdf9ab4e1d1cac92281` | [Mockup](design_asset/task_management_view_mockup.png) | [Code](design_asset/task_management_view_code.html)
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `4561bf01b3e94bdf9ab4e1d1cac92281` | [Mockup](design_asset/task_management_view_mockup.png) | [Code](design_asset/task_management_view_code.html) | [**Full Specification**](screen_specifications/S2_TASK_MANAGEMENT.md)
+<!-- slide -->
 
 Purpose
 Manage and organize tasks.
@@ -181,8 +183,8 @@ Task details appear in a side panel when selected (Desktop/Wide screens).
 On narrow/Mobile screens, animate as a bottom-sheet or full push-transition.
 
 SCREEN 3 — TASK DETAIL PANEL
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `9b35d536a7604974bc9f4d548cd4a162` | [Mockup](design_asset/task_detail_panel_view_mockup.png) | [Code](design_asset/task_detail_panel_view_code.html)
-
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `9b35d536a7604974bc9f4d548cd4a162` | [Mockup](design_asset/task_detail_panel_view_mockup.png) | [Code](design_asset/task_detail_panel_view_code.html) | [**Full Specification**](screen_specifications/S3_TASK_DETAIL.md)
+<!-- slide -->
 Purpose
 Edit and manage task details.
 
@@ -214,8 +216,8 @@ Completed Pomodoro sessions
 Estimated sessions
 
 SCREEN 4 — FOCUS MODE (DISTRACTION-FREE)
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `95683e0c61694cc0987c83f90968972b` | [Mockup](design_asset/distraction_free_focus_mode_mockup.png) | [Code](design_asset/distraction_free_focus_mode_code.html)
-
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `95683e0c61694cc0987c83f90968972b` | [Mockup](design_asset/distraction_free_focus_mode_mockup.png) | [Code](design_asset/distraction_free_focus_mode_code.html) | [**Full Specification**](screen_specifications/S4_FOCUS_MODE.md)
+<!-- slide -->
 Purpose
 Deep work environment.
 
@@ -242,8 +244,8 @@ Picture-in-Picture (PiP) / Mini Mode
 Must include an "Always on Top" mini floating widget displaying just the active time (e.g., `[ 24:15 ]`) for when the user is utilizing other apps.
 
 SCREEN 5 — REPORTS
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `137123b61b7042fdbd4addb1f332d1df` | [Mockup](design_asset/productivity_reports_view_mockup.png) | [Code](design_asset/productivity_reports_view_code.html)
-
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `137123b61b7042fdbd4addb1f332d1df` | [Mockup](design_asset/productivity_reports_view_mockup.png) | [Code](design_asset/productivity_reports_view_code.html) | [**Full Specification**](screen_specifications/S5_REPORTS.md)
+<!-- slide -->
 Purpose
 Show productivity insights.
 
@@ -268,8 +270,8 @@ Insights panel
 Short productivity summaries
 
 SCREEN 6 — SETTINGS
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `624156aa196a4791b239c1dd2529ec6e` | [Mockup](design_asset/application_settings_view_mockup.png) | [Code](design_asset/application_settings_view_code.html)
-
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `624156aa196a4791b239c1dd2529ec6e` | [Mockup](design_asset/application_settings_view_mockup.png) | [Code](design_asset/application_settings_view_code.html) | [**Full Specification**](screen_specifications/S6_SETTINGS.md)
+<!-- slide -->
 Sections
 
 General
@@ -293,8 +295,8 @@ Export data
 Backup data
 
 SCREEN 7 — COMMAND PALETTE (Cmd+K)
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `32c0c09f808241dba081d3ab71eae2da` | [Mockup](design_asset/command_palette_modal_view_mockup.png) | [Code](design_asset/command_palette_modal_view_code.html)
-
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `32c0c09f808241dba081d3ab71eae2da` | [Mockup](design_asset/command_palette_modal_view_mockup.png) | [Code](design_asset/command_palette_modal_view_code.html) | [**Full Specification**](screen_specifications/S7_COMMAND_PALETTE.md)
+<!-- slide -->
 Purpose
 Rapid, keyboard-only access to all app features.
 
@@ -311,8 +313,8 @@ Recent Searches or Views
 Keyboard hints (`↵ to select`, `Esc to close`) aligned to right
 
 SCREEN 8 — MENU BAR DROPDOWN (macOS & Windows System Tray)
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `dee40ed0aaf14439aed7a827339368c7` | [Mockup](design_asset/menu_bar_status_app_dropdown_mockup.png) | [Code](design_asset/menu_bar_status_app_dropdown_code.html)
-
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `dee40ed0aaf14439aed7a827339368c7` | [Mockup](design_asset/menu_bar_status_app_dropdown_mockup.png) | [Code](design_asset/menu_bar_status_app_dropdown_code.html) | [**Full Specification**](screen_specifications/S8_MENU_BAR.md)
+<!-- slide -->
 Purpose
 Ambient command center for the app while working in other windows. Must be summonable natively via a customizable global OS shortcut (e.g., `Option+Cmd+Space`).
 
@@ -327,7 +329,8 @@ Quick input: Single-line input field to add new tasks instantly without stealing
 Upcoming focus list: Minimalist checklist of top 3 upcoming tasks.
 
 SCREEN 9 — OS WIDGETS (Desktop & Mobile)
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `36100c0e6c3f4d7cbf579343b28f871a` | [Mockup](design_asset/productivity_desktop_widgets_mockup.png) | [Code](design_asset/productivity_desktop_widgets_code.html)
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `36100c0e6c3f4d7cbf579343b28f871a` | [Mockup](design_asset/productivity_desktop_widgets_mockup.png) | [Code](design_asset/productivity_desktop_widgets_code.html) | [**Full Specification**](screen_specifications/S9_OS_WIDGETS.md)
+<!-- slide -->
 
 Purpose
 Glanceable awareness of time and daily progress without opening the app at all.
@@ -342,7 +345,8 @@ Medium Widget
 Split view. Left: Timer ring and active task. Right: Clean checklist of top 3 tasks.
 
 SCREEN 10 — RICH NOTIFICATIONS
-**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `e18fb17488754f0eb20e87678d837cec` | [Mockup](design_asset/macos_rich_notification_popup_mockup.png) | [Code](design_asset/macos_rich_notification_popup_code.html)
+**Stitch Reference:** Project ID `14675736852343732341` | Screen ID `e18fb17488754f0eb20e87678d837cec` | [Mockup](design_asset/macos_rich_notification_popup_mockup.png) | [Code](design_asset/macos_rich_notification_popup_code.html) | [**Full Specification**](screen_specifications/S10_NOTIFICATIONS.md)
+<!-- slide -->
 
 Purpose
 Actionable OS-level alerts that guide sessions and minimize context switching.

@@ -223,7 +223,14 @@ CREATE TABLE sync_metadata (
 *   Implement the core Timer state machine in Rust.
 *   Build skeleton SwiftUI & WinUI interfaces proving the FFI bridge.
 
+### Phase 1.2: High-Fidelity Design Specifications (Week 3)
+*See the detailed [Phase 1.2 Implementation Document](PHASE_1_2.md) and the [Design Plan](DESIGN_PLAN.md) for full specs.*
+*   Translate visual mockups into structured, developer-ready documentation for all 10 application screens.
+*   Harmonize the design system specifications with the Rust core data models (Task, Timer, Settings).
+*   Finalize component hierarchies, interaction models, and SQLite data flow mapping for each screen.
+
 ### Phase 2: Productivity Features & Production Integration (Weeks 4-6)
+*See the detailed [Phase 2 Implementation Document](PHASE_2.md) for full specs, prerequisites, and revalidation logic.*
 *   **Production Integration (Apple):** Migrate from the initial "Run Script" build phase to a production-grade **XCFramework + Swift Package Manager (SPM)** architecture. This bypasses Xcode's script sandbox and improves build reliability.
 *   **Feature Build-out:** Implement Subtasks, Notes schema, and UI binding.
 *   **Scheduling:** Implement Recurring Tasks logic (scheduling engine).
