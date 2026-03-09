@@ -6,13 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		1FB94EDC2F5ED27800B5AF46 /* libfocus_core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FB94EDB2F5ED27800B5AF46 /* libfocus_core.dylib */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		1FB94EA32F5EC01800B5AF46 /* FocusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FocusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1FB94EDB2F5ED27800B5AF46 /* libfocus_core.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfocus_core.dylib; path = ../target/debug/libfocus_core.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -28,7 +23,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1FB94EDC2F5ED27800B5AF46 /* libfocus_core.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -39,7 +33,6 @@
 			isa = PBXGroup;
 			children = (
 				1FB94EA52F5EC01800B5AF46 /* FocusApp */,
-				1FB94EDA2F5ED27800B5AF46 /* Frameworks */,
 				1FB94EA42F5EC01800B5AF46 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +45,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1FB94EDA2F5ED27800B5AF46 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				1FB94EDB2F5ED27800B5AF46 /* libfocus_core.dylib */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -67,7 +52,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1FB94EAE2F5EC01800B5AF46 /* Build configuration list for PBXNativeTarget "FocusApp" */;
 			buildPhases = (
-				1FB94EB32F5EC0EE00B5AF46 /* New Run Script Phase */,
 				1FB94E9F2F5EC01800B5AF46 /* Sources */,
 				1FB94EA12F5EC01800B5AF46 /* Resources */,
 				1FB94ED02F5EC91900B5AF46 /* Frameworks */,
@@ -129,27 +113,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		1FB94EB32F5EC0EE00B5AF46 /* New Run Script Phase */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "New Run Script Phase";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Set up cargo path for Xcode\nexport PATH=\"$HOME/.cargo/bin:$PATH\"\n\n# Move to the root of our monorepo\n# PROJECT_DIR is the directory containing the .xcodeproj\ncd \"${PROJECT_DIR}/..\"\n\necho \"Building Rust Core Engine...\"\ncargo build\n\necho \"Generating UniFFI Swift Bindings...\"\n# Ensure the Generated directory exists within the Target folder\nmkdir -p \"${PROJECT_DIR}/FocusApp/Generated\"\n\n# Generate bindings\ncargo run --bin uniffi-bindgen -- generate --library target/debug/libfocus_core.dylib --language swift --out-dir \"${PROJECT_DIR}/FocusApp/Generated\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1FB94E9F2F5EC01800B5AF46 /* Sources */ = {

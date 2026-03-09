@@ -11,8 +11,8 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin aarch64-apple-ios aar
 echo "🔨 Compiling Rust core..."
 cargo build --lib --release --target aarch64-apple-darwin
 cargo build --lib --release --target x86_64-apple-darwin
-cargo build --lib --release --target aarch64-apple-ios
-cargo build --lib --release --target aarch64-apple-ios-sim
+# cargo build --lib --release --target aarch64-apple-ios
+# cargo build --lib --release --target aarch64-apple-ios-sim
 
 # 3. Create Universal macOS binary
 echo "🧬 Creating Universal macOS Binary..."
@@ -33,10 +33,14 @@ cargo build --bin uniffi-bindgen
 # 5. Package as XCFramework
 echo "📦 Assembling XCFramework..."
 rm -rf ../FocusCore.xcframework
+# xcodebuild -create-xcframework \
+#     -library ../target/universal-macos/release/libfocus_core.a -headers generated_swift \
+#     -library ../target/aarch64-apple-ios/release/libfocus_core.a -headers generated_swift \
+#     -library ../target/aarch64-apple-ios-sim/release/libfocus_core.a -headers generated_swift \
+#     -output ../FocusCore.xcframework
+
 xcodebuild -create-xcframework \
     -library ../target/universal-macos/release/libfocus_core.a -headers generated_swift \
-    -library ../target/aarch64-apple-ios/release/libfocus_core.a -headers generated_swift \
-    -library ../target/aarch64-apple-ios-sim/release/libfocus_core.a -headers generated_swift \
     -output ../FocusCore.xcframework
 
 echo "✅ Success! FocusCore.xcframework has been generated in the parent directory."

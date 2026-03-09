@@ -1,4 +1,0 @@
-module focus_coreFFI {
-    header "focus_coreFFI.h"
-    export *
-}

@@ -37,6 +37,7 @@ struct ContentView: View {
                         
                         Text(task.title)
                             .strikethrough(task.isCompleted, color: .primary)
+
                         
                         Spacer()
                         
