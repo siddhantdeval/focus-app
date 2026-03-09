@@ -42,6 +42,7 @@ The system follows a strict **Clean Architecture** pattern, segmented into three
 *   **Timer Engine:** High-precision background tick generator in Rust, dispatching events to the State Layer.
 *   **Task Manager:** Handles CRUD operations, subtask trees, and recurrence generation.
 *   **Reporting Engine:** Queries local SQLite to generate daily/weekly analytics.
+*   **Database Worker:** Dedicated synchronous SQLite worker thread receiving commands via MPSC channel to prevent FFI blocking.
 
 ### Local-First & Sync Architecture
 *   **Local Database:** SQLite acts as the primary data store (offline-first).
@@ -96,7 +97,7 @@ We avoid Electron/WebView frameworks to ensure maximum performance and minimal b
 *   **Local Database:** `rusqlite` (Rust SQLite bindings)
 *   **Background Services:** Native APIs (e.g., Android WorkManager, Apple BackgroundTasks) accessed via FFI callbacks.
 *   **Cloud Sync Option:** Simple Golang or Rust REST/WebSocket API with PostgreSQL (for centralized sync metadata).
-*   **State Management:** Reactive streams (Swift Combine/AsyncStream, Kotlin Flow, C# IObservable) subscribed to a Rust Event channel.
+*   **State Management:** Native callback interface passed to Rust UniFFI, receiving serialized event enums (e.g., `Event::TaskUpdated`), which native UI uses to trigger targeted queries.
 
 ---
 
@@ -110,7 +111,7 @@ We avoid Electron/WebView frameworks to ensure maximum performance and minimal b
 *   **Edge Cases:** OS sleep/hibernate. *Solution:* Calculate time delta upon system wake.
 
 ### Tasks & Subtasks
-*   **Description:** To-do items with endless or 1-level deep nesting.
+*   **Description:** To-do items with strictly 1-level deep nesting.
 *   **Module Responsibility:** `TaskManager`
 *   **Data Model:** `Task { id, parent_id (nullable), title, completed, created_at, sort_order }`
 *   **UI Components:** Draggable list items, contextual swipe actions.
@@ -168,6 +169,13 @@ CREATE TABLE tasks (
     FOREIGN KEY (parent_id) REFERENCES tasks(id) ON DELETE CASCADE
 );
 
+CREATE VIRTUAL TABLE tasks_fts USING fts5(
+    id UNINDEXED,
+    title,
+    content='tasks',
+    content_rowid='rowid'
+);
+
 CREATE INDEX idx_tasks_parent ON tasks(parent_id);
 
 CREATE TABLE pomodoro_sessions (
@@ -200,6 +208,11 @@ CREATE TABLE sync_metadata (
     last_sync_timestamp INTEGER,
     cursor_token TEXT
 );
+
+CREATE TABLE app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 ```
 *(Users table is omitted as the app is Local-First. Sync authenticates via a secure keychain token hitting the Cloud API directly).*
 
@@ -223,11 +236,12 @@ CREATE TABLE sync_metadata (
 *   Implement the core Timer state machine in Rust.
 *   Build skeleton SwiftUI & WinUI interfaces proving the FFI bridge.
 
-### Phase 1.2: High-Fidelity Design Specifications (Week 3)
+### Phase 1.2: High-Fidelity Design & Core State Bridging (Week 3)
 *See the detailed [Phase 1.2 Implementation Document](PHASE_1_2.md) and the [Design Plan](DESIGN_PLAN.md) for full specs.*
 *   Translate visual mockups into structured, developer-ready documentation for all 10 application screens.
-*   Harmonize the design system specifications with the Rust core data models (Task, Timer, Settings).
+*   Harmonize the design system specifications with the Rust core data models (Task, Timer, Settings) through explicit business logic mapping.
 *   Finalize component hierarchies, interaction models, and SQLite data flow mapping for each screen.
+*   Validate the UX to Rust state FFI boundaries to guarantee zero-latency local-first reactivity.
 
 ### Phase 2: Productivity Features & Production Integration (Weeks 4-6)
 *See the detailed [Phase 2 Implementation Document](PHASE_2.md) for full specs, prerequisites, and revalidation logic.*
