@@ -11,6 +11,7 @@ import UserNotifications
 
 @main
 struct FocusAppApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
         // Find the Application Support directory for this app
@@ -40,27 +41,65 @@ struct FocusAppApp: App {
         WindowGroup {
             ContentView()
         }
+        .windowStyle(.hiddenTitleBar)
         
-        MenuBarExtra("Focus", systemImage: "timer") {
-            // Simplified Menu Bar Dropdown S8
-            VStack(spacing: 12) {
-                Text("Focus Session")
-                    .font(.headline)
-                
-                Button("Bring to Front") {
-                    if let window = NSApplication.shared.windows.first {
-                        window.makeKeyAndOrderFront(nil)
-                        NSApp.activate(ignoringOtherApps: true)
-                    }
-                }
-                
-                Button("Quit") {
-                    NSApplication.shared.terminate(nil)
-                }
-                .keyboardShortcut("q")
-            }
-            .padding()
-        }
-        .menuBarExtraStyle(.window)
+        MenuBarContainer()
     }
 }
+
+// Shell view to hold the ViewModel for the Menu Bar isolated context
+struct MenuBarRootView: View {
+    @StateObject var viewModel = FocusViewModel()
+    var body: some View {
+        MenuBarCompanionView(viewModel: viewModel)
+    }
+}
+
+// Wrapper to hold the shared state for the MenuBar title
+struct MenuBarContainer: Scene {
+    @StateObject private var viewModel = FocusViewModel()
+    
+    var body: some Scene {
+        MenuBarExtra(content: {
+            MenuBarCompanionView(viewModel: viewModel)
+        }, label: {
+            HStack {
+                Image(systemName: "timer")
+                if viewModel.timerState == .running || viewModel.timerState == .paused {
+                    Text(timeString(from: viewModel.timerRemaining))
+                }
+            }
+        })
+        .menuBarExtraStyle(.window)
+    }
+    
+    private func timeString(from seconds: UInt32) -> String {
+        let m = seconds / 60
+        let s = seconds % 60
+        return String(format: "%02d:%02d", m, s)
+    }
+}
+
+// Global Notification Delegate for S10 implementation
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        UNUserNotificationCenter.current().delegate = self
+    }
+    
+    // Handle notification action events globally
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let actionIdentifier = response.actionIdentifier
+        
+        if actionIdentifier == "BREAK_ACTION" {
+            // S10: Trigger 5 minute rest cycle via ViewModel/Core
+            print("User requested: Start Break")
+            // Implementation requires accessing the shared ViewModel instance or Core directly
+        } else if actionIdentifier == "SKIP_ACTION" {
+            // S10: User skips break, continue working
+            print("User requested: Skip Break")
+        }
+        
+        completionHandler()
+    }
+}
+

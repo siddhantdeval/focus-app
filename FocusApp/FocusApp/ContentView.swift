@@ -16,23 +16,32 @@ struct ContentView: View {
             if viewModel.activeMode == .focus {
                 FocusModeView(viewModel: viewModel)
             } else {
-                NavigationSplitView {
+                HStack(spacing: 0) {
                     MainSidebarView(viewModel: viewModel)
-                } detail: {
+                        .frame(width: 256)
+                        .background(Color.backgroundLight)
+                        .border(Color.slate200, width: 1)
+                    
                     switch viewModel.activeMode {
                     case .dashboard:
                         DashboardView(viewModel: viewModel)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     case .tasks:
                         TaskListView(viewModel: viewModel)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     case .settings:
                         SettingsView(viewModel: viewModel)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     default:
                         Text("Work in Progress: \(viewModel.activeMode.rawValue)")
-                            .font(.title)
-                            .foregroundColor(.gray)
+                            .font(TWFont.xxl)
+                            .foregroundColor(Color.slate400)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
-                .frame(minWidth: 800, minHeight: 600)
+                .ignoresSafeArea()
+                .frame(minWidth: 900, minHeight: 600)
+                .background(Color.backgroundLight)
             }
             
             // Command Palette Overlay (S7)
