@@ -22,13 +22,14 @@ This approach uses infrastructure-as-code (`.xcconfig`) and automated build scri
 We use a `.xcconfig` file to provide Xcode with search paths for the bridging header and libraries, and to disable Apple's restrictive User Script Sandboxing (which otherwise blocks Rust from writing generated files).
 
 1. Ensure `FocusApp.xcconfig` exists at `/FocusApp/FocusApp/FocusApp.xcconfig`.
-2. Right-click the `FocusApp` folder in the Xcode navigator.
-3. Select **Add Files to "FocusApp"...** and select `FocusApp.xcconfig`.
-4. Click the top-level **FocusApp** project in the navigator.
-5. In the middle pane, select the **Project** (not the Target) named `FocusApp`.
-6. Go to the **Info** tab.
-7. Under **Configurations**, expand both `Debug` and `Release`. 
-8. Change the dropdown next to `FocusApp` from `None` to `FocusApp` (this applies our config).
+2. Right-click the `FocusApp` folder in the Xcode navigator (left sidebar).
+3. Select **Add Files to "FocusApp"...** and select the `FocusApp.xcconfig` file. *(Make sure "Copy items if needed" is UNCHECKED)*.
+4. Click the top-level **FocusApp** project (the blue blueprint icon) at the very top of the left navigator.
+5. In the middle pane, look at the sidebar under **Project** (NOT "Targets"). Click the one named `FocusApp`.
+6. Go to the **Info** tab at the top of that middle pane.
+7. You will see a section called **Configurations**. Click the small arrows to expand both `Debug` and `Release`. 
+8. You will see your target (`FocusApp`) listed under each. Change the dropdown menu next to it from **`None`** to **`FocusApp`**. 
+   *(This tells Xcode to actually read and apply the settings from your `.xcconfig` file!)*
 
 ---
 
