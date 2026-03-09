@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
 uniffi = { version = "0.28", features = ["cli"] }
@@ -15,6 +15,7 @@ serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", features = ["serde"] }
 once_cell = "1.20"
 camino = "1.1"
+rrule = "0.14.0"
 
 [target.'cfg(target_os = "android")'.dependencies]
 # Future placeholder for android support

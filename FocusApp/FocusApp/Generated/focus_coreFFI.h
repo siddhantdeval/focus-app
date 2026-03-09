@@ -251,6 +251,13 @@ typedef void (*UniffiForeignFutureCompleteVoid)(uint64_t, UniffiForeignFutureStr
     );
 
 #endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_EVENT_OBSERVER_METHOD0
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_EVENT_OBSERVER_METHOD0
+typedef void (*UniffiCallbackInterfaceEventObserverMethod0)(uint64_t, RustBuffer, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
 #ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_TIMER_OBSERVER_METHOD0
 #define UNIFFI_FFIDEF_CALLBACK_INTERFACE_TIMER_OBSERVER_METHOD0
 typedef void (*UniffiCallbackInterfaceTimerObserverMethod0)(uint64_t, uint32_t, void* _Nonnull, 
@@ -265,6 +272,14 @@ typedef void (*UniffiCallbackInterfaceTimerObserverMethod1)(uint64_t, RustBuffer
     );
 
 #endif
+#ifndef UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_EVENT_OBSERVER
+#define UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_EVENT_OBSERVER
+typedef struct UniffiVTableCallbackInterfaceEventObserver {
+    UniffiCallbackInterfaceEventObserverMethod0 _Nonnull onEvent;
+    UniffiCallbackInterfaceFree _Nonnull uniffiFree;
+} UniffiVTableCallbackInterfaceEventObserver;
+
+#endif
 #ifndef UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_TIMER_OBSERVER
 #define UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_TIMER_OBSERVER
 typedef struct UniffiVTableCallbackInterfaceTimerObserver {
@@ -273,6 +288,11 @@ typedef struct UniffiVTableCallbackInterfaceTimerObserver {
     UniffiCallbackInterfaceFree _Nonnull uniffiFree;
 } UniffiVTableCallbackInterfaceTimerObserver;
 
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_INIT_CALLBACK_VTABLE_EVENTOBSERVER
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_INIT_CALLBACK_VTABLE_EVENTOBSERVER
+void uniffi_focus_core_fn_init_callback_vtable_eventobserver(UniffiVTableCallbackInterfaceEventObserver* _Nonnull vtable
+);
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_INIT_CALLBACK_VTABLE_TIMEROBSERVER
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_INIT_CALLBACK_VTABLE_TIMEROBSERVER
@@ -287,6 +307,12 @@ RustBuffer uniffi_focus_core_fn_func_create_task(RustBuffer title, RustCallStatu
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_DELETE_TASK
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_DELETE_TASK
 void uniffi_focus_core_fn_func_delete_task(RustBuffer id, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GENERATE_RECURRING_TASKS
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GENERATE_RECURRING_TASKS
+void uniffi_focus_core_fn_func_generate_recurring_tasks(RustCallStatus *_Nonnull out_status
+    
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_GET_TASKS
@@ -316,6 +342,16 @@ void uniffi_focus_core_fn_func_pause_timer(RustCallStatus *_Nonnull out_status
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_RESUME_TIMER
 void uniffi_focus_core_fn_func_resume_timer(RustCallStatus *_Nonnull out_status
     
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_SEARCH_TASKS
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_SEARCH_TASKS
+RustBuffer uniffi_focus_core_fn_func_search_tasks(RustBuffer query, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_SET_EVENT_OBSERVER
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_SET_EVENT_OBSERVER
+void uniffi_focus_core_fn_func_set_event_observer(uint64_t observer, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_FN_FUNC_START_TIMER
@@ -626,6 +662,12 @@ uint16_t uniffi_focus_core_checksum_func_delete_task(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GENERATE_RECURRING_TASKS
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GENERATE_RECURRING_TASKS
+uint16_t uniffi_focus_core_checksum_func_generate_recurring_tasks(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GET_TASKS
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_GET_TASKS
 uint16_t uniffi_focus_core_checksum_func_get_tasks(void
@@ -656,6 +698,18 @@ uint16_t uniffi_focus_core_checksum_func_resume_timer(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_SEARCH_TASKS
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_SEARCH_TASKS
+uint16_t uniffi_focus_core_checksum_func_search_tasks(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_SET_EVENT_OBSERVER
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_SET_EVENT_OBSERVER
+uint16_t uniffi_focus_core_checksum_func_set_event_observer(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_START_TIMER
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_START_TIMER
 uint16_t uniffi_focus_core_checksum_func_start_timer(void
@@ -671,6 +725,12 @@ uint16_t uniffi_focus_core_checksum_func_stop_timer(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_UPDATE_TASK_STATUS
 #define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_FUNC_UPDATE_TASK_STATUS
 uint16_t uniffi_focus_core_checksum_func_update_task_status(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_METHOD_EVENTOBSERVER_ON_EVENT
+#define UNIFFI_FFIDEF_UNIFFI_FOCUS_CORE_CHECKSUM_METHOD_EVENTOBSERVER_ON_EVENT
+uint16_t uniffi_focus_core_checksum_method_eventobserver_on_event(void
     
 );
 #endif

@@ -30,6 +30,16 @@ pub enum TimerState {
     Paused,
 }
 
+#[derive(Clone, Debug, PartialEq, uniffi::Enum)]
+pub enum CoreEvent {
+    TasksUpdated,
+}
+
+#[uniffi::export(callback_interface)]
+pub trait EventObserver: Send + Sync {
+    fn on_event(&self, event: CoreEvent);
+}
+
 // --- SINGLETONS ---
 
 static DB: Lazy<Mutex<Option<database::Database>>> = Lazy::new(|| {
@@ -37,6 +47,14 @@ static DB: Lazy<Mutex<Option<database::Database>>> = Lazy::new(|| {
 });
 
 static TIMER: Lazy<timer::TimerEngine> = Lazy::new(timer::TimerEngine::new);
+
+static EVENT_OBSERVER: Lazy<Mutex<Option<Box<dyn EventObserver>>>> = Lazy::new(|| Mutex::new(None));
+
+fn emit_tasks_updated() {
+    if let Some(obs) = EVENT_OBSERVER.lock().unwrap().as_ref() {
+        obs.on_event(CoreEvent::TasksUpdated);
+    }
+}
 
 // --- EXPORTED FUNCTIONS ---
 
@@ -47,6 +65,12 @@ pub fn init_core(db_path: String) {
         let db = database::Database::open(&db_path).expect("Failed to open permanent database");
         *db_lock = Some(db);
     }
+}
+
+#[uniffi::export]
+pub fn set_event_observer(observer: Box<dyn EventObserver>) {
+    let mut obs = EVENT_OBSERVER.lock().unwrap();
+    *obs = Some(observer);
 }
 
 #[uniffi::export]
@@ -66,6 +90,7 @@ pub fn create_task(title: String) -> Task {
     } else {
         panic!("Core not initialized. Call init_core() first.");
     }
+    emit_tasks_updated();
     task
 }
 
@@ -89,6 +114,7 @@ pub fn update_task_status(id: String, completed: bool) {
     } else {
         panic!("Core not initialized. Call init_core() first.");
     }
+    emit_tasks_updated();
 }
 
 #[uniffi::export]
@@ -100,6 +126,28 @@ pub fn delete_task(id: String) {
     } else {
         panic!("Core not initialized. Call init_core() first.");
     }
+    emit_tasks_updated();
+}
+
+#[uniffi::export]
+pub fn search_tasks(query: String) -> Vec<Task> {
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.search_tasks(&query).expect("Failed to search tasks")
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+}
+
+#[uniffi::export]
+pub fn generate_recurring_tasks() {
+    let db_lock = DB.lock().unwrap();
+    if let Some(db) = db_lock.as_ref() {
+        db.generate_recurring_tasks().expect("Failed to generate recurring tasks");
+    } else {
+        panic!("Core not initialized. Call init_core() first.");
+    }
+    emit_tasks_updated();
 }
 
 #[uniffi::export]

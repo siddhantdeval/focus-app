@@ -554,6 +554,63 @@ public func FfiConverterTypeTask_lower(_ value: Task) -> RustBuffer {
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
+public enum CoreEvent {
+    
+    case tasksUpdated
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeCoreEvent: FfiConverterRustBuffer {
+    typealias SwiftType = CoreEvent
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> CoreEvent {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .tasksUpdated
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: CoreEvent, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .tasksUpdated:
+            writeInt(&buf, Int32(1))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeCoreEvent_lift(_ buf: RustBuffer) throws -> CoreEvent {
+    return try FfiConverterTypeCoreEvent.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeCoreEvent_lower(_ value: CoreEvent) -> RustBuffer {
+    return FfiConverterTypeCoreEvent.lower(value)
+}
+
+
+
+extension CoreEvent: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
 public enum TimerState {
     
     case idle
@@ -625,11 +682,9 @@ extension TimerState: Equatable, Hashable {}
 
 
 
-public protocol TimerObserver : AnyObject {
+public protocol EventObserver : AnyObject {
     
-    func onTick(remainingSeconds: UInt32) 
-    
-    func onStateChanged(state: TimerState) 
+    func onEvent(event: CoreEvent) 
     
 }
 
@@ -640,6 +695,107 @@ private let IDX_CALLBACK_FREE: Int32 = 0
 private let UNIFFI_CALLBACK_SUCCESS: Int32 = 0
 private let UNIFFI_CALLBACK_ERROR: Int32 = 1
 private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfaceEventObserver {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    static var vtable: UniffiVTableCallbackInterfaceEventObserver = UniffiVTableCallbackInterfaceEventObserver(
+        onEvent: { (
+            uniffiHandle: UInt64,
+            event: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceEventObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onEvent(
+                     event: try FfiConverterTypeCoreEvent.lift(event)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            let result = try? FfiConverterCallbackInterfaceEventObserver.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface EventObserver: handle missing in uniffiFree")
+            }
+        }
+    )
+}
+
+private func uniffiCallbackInitEventObserver() {
+    uniffi_focus_core_fn_init_callback_vtable_eventobserver(&UniffiCallbackInterfaceEventObserver.vtable)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfaceEventObserver {
+    fileprivate static var handleMap = UniffiHandleMap<EventObserver>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfaceEventObserver : FfiConverter {
+    typealias SwiftType = EventObserver
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
+
+
+
+public protocol TimerObserver : AnyObject {
+    
+    func onTick(remainingSeconds: UInt32) 
+    
+    func onStateChanged(state: TimerState) 
+    
+}
+
+
 
 // Put the implementation in a struct so we don't pollute the top-level namespace
 fileprivate struct UniffiCallbackInterfaceTimerObserver {
@@ -790,6 +946,11 @@ public func deleteTask(id: String) {try! rustCall() {
     )
 }
 }
+public func generateRecurringTasks() {try! rustCall() {
+    uniffi_focus_core_fn_func_generate_recurring_tasks($0
+    )
+}
+}
 public func getTasks() -> [Task] {
     return try!  FfiConverterSequenceTypeTask.lift(try! rustCall() {
     uniffi_focus_core_fn_func_get_tasks($0
@@ -815,6 +976,19 @@ public func pauseTimer() {try! rustCall() {
 }
 public func resumeTimer() {try! rustCall() {
     uniffi_focus_core_fn_func_resume_timer($0
+    )
+}
+}
+public func searchTasks(query: String) -> [Task] {
+    return try!  FfiConverterSequenceTypeTask.lift(try! rustCall() {
+    uniffi_focus_core_fn_func_search_tasks(
+        FfiConverterString.lower(query),$0
+    )
+})
+}
+public func setEventObserver(observer: EventObserver) {try! rustCall() {
+    uniffi_focus_core_fn_func_set_event_observer(
+        FfiConverterCallbackInterfaceEventObserver.lower(observer),$0
     )
 }
 }
@@ -859,6 +1033,9 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_delete_task() != 35093) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_focus_core_checksum_func_generate_recurring_tasks() != 47528) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_focus_core_checksum_func_get_tasks() != 6857) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -874,6 +1051,12 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_resume_timer() != 62750) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_focus_core_checksum_func_search_tasks() != 3094) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_focus_core_checksum_func_set_event_observer() != 43281) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_focus_core_checksum_func_start_timer() != 20441) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -883,6 +1066,9 @@ private var initializationResult: InitializationResult = {
     if (uniffi_focus_core_checksum_func_update_task_status() != 6425) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_focus_core_checksum_method_eventobserver_on_event() != 5462) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_focus_core_checksum_method_timerobserver_on_tick() != 48437) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -890,6 +1076,7 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
 
+    uniffiCallbackInitEventObserver()
     uniffiCallbackInitTimerObserver()
     return InitializationResult.ok
 }()

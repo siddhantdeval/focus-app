@@ -98,4 +98,39 @@ mod tests {
 
         let _ = std::fs::remove_file(&db_path);
     }
+    
+    #[test]
+    fn test_fts5_search_indexing() {
+        let db = crate::database::Database::open_in_memory().unwrap();
+        
+        // Create variations of tasks
+        db.create_task("search_task_1", "Finish the quarterly financial report", 1000).unwrap();
+        db.create_task("search_task_2", "Buy groceries: apples, milk, bread", 1001).unwrap();
+        db.create_task("search_task_3", "Report bugs found in the new release", 1002).unwrap();
+        
+        // Need a slight buffer to ensure async MPSC commands persist if this was truly async,
+        // though our implementation waits on rx.recv(), so it is synchronous to the caller.
+        
+        // Exact match
+        let results = db.search_tasks("financial").unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, "search_task_1");
+        
+        // Partial/stem match ("Report" hits "report" in task 1 and "Report" in task 3)
+        let results2 = db.search_tasks("report").unwrap();
+        assert_eq!(results2.len(), 2);
+        
+        // Delete a task and ensure it drops from FTS5 index
+        db.delete_task("search_task_1").unwrap();
+        let results3 = db.search_tasks("financial").unwrap();
+        assert_eq!(results3.len(), 0);
+        
+        // Update a task and verify FTS5 changes
+        // (Currently, update_task_status doesn't change title, so we skip title updates
+        // but verify status completion via get_tasks).
+        db.update_task_status("search_task_2", true, 2000).unwrap();
+        let results4 = db.search_tasks("groceries").unwrap();
+        assert_eq!(results4.len(), 1);
+        assert_eq!(results4[0].is_completed, true);
+    }
 }
